@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+  :root { --navy:#1f3a5f; --line:#d6dbe3; --bg:#f6f8fb; --muted:#5b6575; --ok:#1b7a3d; --warn:#b26a00; --no:#7a7f87; --info:#2a5db0; }
+  * { box-sizing:border-box; }
+  body { font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif; font-size:13px; color:#1d2430; margin:0; background:#fff; }
+  .wrap { display:grid; grid-template-columns: 380px 1fr; height:100vh; }
+  .left { border-right:1px solid var(--line); overflow-y:auto; padding:14px; background:var(--bg); }
+  .right { overflow-y:auto; padding:14px 16px; }
+  h2 { font-size:14px; margin:16px 0 8px; color:var(--navy); border-bottom:2px solid var(--navy); padding-bottom:4px; }
+  h2:first-child { margin-top:0; }
+  label { display:block; margin:6px 0 2px; font-weight:600; }
+  select, input[type=text] { width:100%; padding:6px 8px; border:1px solid var(--line); border-radius:4px; font-size:13px; background:#fff; }
+  .chk { display:flex; align-items:flex-start; gap:6px; margin:4px 0; font-weight:400; }
+  .chk input { margin-top:2px; }
+  .row { display:flex; gap:6px; }
+  .row > * { flex:1; }
+  button { padding:7px 12px; border:1px solid var(--navy); background:#fff; color:var(--navy); border-radius:4px; cursor:pointer; font-size:13px; }
+  button.primary { background:var(--navy); color:#fff; width:100%; padding:10px; font-size:14px; margin-top:12px; }
+  button:disabled { opacity:.5; cursor:default; }
+  .hint { color:var(--muted); font-size:12px; margin:2px 0 6px; }
+  .cand { background:#fff; border:1px solid var(--line); border-radius:4px; padding:6px 8px; margin:4px 0; }
+  .cand .chk { margin:0; }
+  .task { background:#fff; border:1px solid var(--navy); border-radius:6px; padding:8px; margin:6px 0; }
+  .task .title { font-weight:700; display:flex; justify-content:space-between; gap:8px; }
+  .task .title button { padding:2px 8px; font-size:12px; white-space:nowrap; flex:0 0 auto; align-self:flex-start; }
+  .q { margin:6px 0 0; padding-top:6px; border-top:1px dashed var(--line); }
+  .q .qt { margin-bottom:3px; }
+  .radios { display:flex; gap:12px; }
+  .radios label { font-weight:400; margin:0; display:flex; gap:4px; align-items:center; }
+  table { width:100%; border-collapse:collapse; margin-top:6px; font-size:12px; table-layout:fixed; }
+  col.c1{width:76px} col.c2{width:110px} col.c3{width:150px} col.c4{width:96px} col.c5{width:100px} col.c6{width:130px}
+  th, td { border:1px solid var(--line); padding:6px 7px; vertical-align:top; text-align:left; }
+  th { background:var(--navy); color:#fff; font-weight:600; white-space:nowrap; }
+  .badge { display:inline-block; padding:1px 7px; border-radius:10px; font-size:12px; font-weight:700; white-space:nowrap; color:#fff; }
+  .s-대상 { background:var(--ok); } .s-판단 { background:var(--warn); } .s-비대상 { background:var(--no); } .s-갈음 { background:var(--info); } .s-참고 { background:#8a93a3; }
+  .lv { font-size:11px; color:var(--muted); }
+  .layer { margin-top:14px; font-weight:700; color:var(--navy); }
+  .notes { background:#fff8e6; border:1px solid #f0d58c; border-radius:4px; padding:8px 10px; margin-top:12px; }
+  .notes li { margin:3px 0; }
+  .disc { color:#b00020; margin-top:14px; font-size:12px; }
+  .meta { color:var(--muted); font-size:12px; }
+  .empty { color:var(--muted); padding:40px 0; text-align:center; }
+  details { margin-top:4px; } summary { cursor:pointer; color:var(--info); font-size:12px; }
+  .msg { margin-top:8px; font-size:12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="left">
+    <h2>1. 근로자 정보</h2>
+    <label>근로자 (이름 또는 사번, 선택)</label>
+    <input type="text" id="workerName" placeholder="예: 홍길동 / A1234">
+    <label>직무 구분</label>
+    <select id="job">
+      <option value="other">그 밖의 근로자 (생산·현장 등)</option>
+      <option value="office">사무직</option>
+      <option value="sales">판매업무 직접 종사</option>
+      <option value="supervisor">관리감독자</option>
+    </select>
+    <div id="empBox">
+      <label>고용 형태</label>
+      <select id="emp">
+        <option value="regular">그 밖의 근로자 (정규직, 1개월 초과 기간제 등)</option>
+        <option value="fixed_1m">1주일 초과 1개월 이하 기간제</option>
+        <option value="fixed_1w">1주일 이하 기간제</option>
+        <option value="daily">일용근로자</option>
+      </select>
+    </div>
+    <label class="chk"><input type="checkbox" id="constructionDaily"> 건설 일용근로자</label>
+    <label class="chk"><input type="checkbox" id="halfTime"> 교육시간 1/2 감면 대상 사업
+    </label>
+    <div class="hint">상시근로자 50명 미만 도매업·숙박 및 음식점업 등 (별표 4 비고 제3호)</div>
+
+    <h2>2. 발생 사유</h2>
+    <label class="chk"><input type="checkbox" id="newHire"> 신규 채용</label>
+    <label class="chk"><input type="checkbox" id="taskChange"> 작업내용 변경 (새 작업 투입·전환)</label>
+
+    <h2>3. 수행 작업</h2>
+    <div class="row">
+      <input type="text" id="q" placeholder="작업을 입력하세요 (예: 비계, 용접, 맨홀)">
+      <button id="searchBtn" style="flex:0 0 auto">검색</button>
+    </div>
+    <div class="hint">검색 결과에서 해당 작업을 체크하세요. 목록에서 직접 고를 수도 있습니다.</div>
+    <select id="allTasks"><option value="">― 39개 특별교육 작업 목록에서 선택 ―</option></select>
+    <div id="cands"></div>
+    <div id="selected"></div>
+
+    <h2>4. 취급 화학물질</h2>
+    <label class="chk"><input type="checkbox" id="sub_msds"> MSDS 대상물질 취급</label>
+    <label class="chk"><input type="checkbox" id="sub_managed"> 관리대상 유해물질 취급</label>
+    <label class="chk"><input type="checkbox" id="sub_permit"> 허가대상 유해물질 취급</label>
+    <label class="chk"><input type="checkbox" id="sub_special"> 특별관리물질 취급</label>
+    <label class="chk"><input type="checkbox" id="sub_newSubstance"> 신규 MSDS 대상물질 도입</label>
+    <label class="chk"><input type="checkbox" id="sub_msdsRevised"> MSDS 유해성·위험성 정보 변경</label>
+
+    <h2>5. 유해인자 노출</h2>
+    <label class="chk"><input type="checkbox" id="hz_noise"> 소음작업</label>
+    <label class="chk"><input type="checkbox" id="hz_vibration"> 진동작업</label>
+    <label class="chk"><input type="checkbox" id="hz_dust"> 분진작업</label>
+    <label class="chk"><input type="checkbox" id="hz_pathogen"> 병원체 노출</label>
+    <label class="chk"><input type="checkbox" id="hz_msd"> 근골격계부담작업</label>
+
+    <h2>6. 기타</h2>
+    <label class="chk"><input type="checkbox" id="otherLaws"> 타 법령 교육도 표시 (화학물질관리법 등, 확인필요)</label>
+
+    <button class="primary" id="judgeBtn">판정하기</button>
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <div class="right">
+    <div class="meta" id="meta">불러오는 중…</div>
+    <div id="result"><div class="empty">왼쪽에 정보를 입력하고 [판정하기]를 누르세요.</div></div>
+  </div>
+</div>
+
+<script>
+var TASKS = [];
+var SELECTED = {};   // no -> { answers:[], intermittent:'unknown' }
+var LAST = null;
+
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); }
+function norm(s) { return String(s).replace(/\s+/g, '').toLowerCase(); }
+
+function fail(e) { $('msg').innerHTML = '<span style="color:#b00020">' + esc(e && e.message ? e.message : e) + '</span>'; $('judgeBtn').disabled = false; }
+
+google.script.run.withSuccessHandler(function (d) {
+  TASKS = d.tasks;
+  $('meta').textContent = '법령 기준: ' + d.app.lawBasis + ' · v' + d.app.version;
+  var sel = $('allTasks');
+  TASKS.forEach(function (t) {
+    var o = document.createElement('option');
+    o.value = t.no; o.textContent = t.no + '. ' + t.name;
+    sel.appendChild(o);
+  });
+}).withFailureHandler(fail).getAppData();
+
+function shortEmp() { var e = $('emp').value; return $('job').value !== 'supervisor' && (e === 'daily' || e === 'fixed_1w'); }
+
+$('job').onchange = function () { $('empBox').style.display = this.value === 'supervisor' ? 'none' : ''; renderSelected(); };
+$('emp').onchange = renderSelected;
+
+function search() {
+  var q = norm($('q').value);
+  var box = $('cands');
+  if (!q) { box.innerHTML = ''; return; }
+  var hits = TASKS.map(function (t) {
+    var score = 0;
+    t.keywords.forEach(function (k) { var nk = norm(k); if (nk && (q.indexOf(nk) >= 0 || nk.indexOf(q) >= 0)) score += 2; });
+    if (norm(t.name).indexOf(q) >= 0) score += 1;
+    return { t: t, score: score };
+  }).filter(function (x) { return x.score > 0; }).sort(function (a, b) { return b.score - a.score; });
+  if (!hits.length) { box.innerHTML = '<div class="hint">일치하는 작업이 없습니다. 다른 표현으로 검색하거나 목록에서 고르세요. 특별교육 대상 작업이 아닐 수도 있습니다.</div>'; return; }
+  box.innerHTML = '<div class="hint">후보 ' + hits.length + '개 · 해당하는 작업을 모두 체크하세요</div>' + hits.map(function (h) {
+    return '<div class="cand"><label class="chk"><input type="checkbox" data-no="' + h.t.no + '"' + (SELECTED[h.t.no] ? ' checked' : '') + '> <span><b>' + h.t.no + '호</b> ' + esc(h.t.name) + '</span></label></div>';
+  }).join('');
+  Array.prototype.forEach.call(box.querySelectorAll('input[data-no]'), function (el) {
+    el.onchange = function () { toggleTask(Number(el.dataset.no), el.checked); };
+  });
+}
+$('searchBtn').onclick = search;
+$('q').onkeydown = function (e) { if (e.key === 'Enter') search(); };
+$('allTasks').onchange = function () { if (this.value) { toggleTask(Number(this.value), true); this.value = ''; } };
+
+function toggleTask(no, on) {
+  if (on) { if (!SELECTED[no]) SELECTED[no] = { answers: [], intermittent: 'unknown' }; }
+  else delete SELECTED[no];
+  renderSelected();
+  Array.prototype.forEach.call($('cands').querySelectorAll('input[data-no="' + no + '"]'), function (el) { el.checked = on; });
+}
+
+function radios(name, val) {
+  return '<div class="radios">' + [['yes', '예'], ['no', '아니오'], ['unknown', '모름']].map(function (o) {
+    return '<label><input type="radio" name="' + name + '" value="' + o[0] + '"' + (val === o[0] ? ' checked' : '') + '>' + o[1] + '</label>';
+  }).join('') + '</div>';
+}
+
+function renderSelected() {
+  var box = $('selected');
+  var nos = Object.keys(SELECTED).map(Number).sort(function (a, b) { return a - b; });
+  if (!nos.length) { box.innerHTML = ''; return; }
+  box.innerHTML = '<div class="hint" style="margin-top:8px">선택한 작업 ' + nos.length + '개</div>' + nos.map(function (no) {
+    var t = TASKS.filter(function (x) { return x.no === no; })[0];
+    var s = SELECTED[no];
+    var html = '<div class="task"><div class="title"><span>' + no + '호 ' + esc(t.name) + '</span><button data-rm="' + no + '">삭제</button></div>';
+    if (t.exclusion) html += '<div class="hint">' + esc(t.exclusion) + '</div>';
+    t.questions.forEach(function (q, i) {
+      html += '<div class="q"><div class="qt">' + esc(q) + '</div>' + radios('q_' + no + '_' + i, s.answers[i] || 'unknown') + '</div>';
+    });
+    if (!shortEmp()) {
+      html += '<div class="q"><div class="qt">단기간 또는 간헐적으로 하는 작업입니까? (예이면 특별교육 2시간)</div>' + radios('i_' + no, s.intermittent) + '</div>';
+    }
+    return html + '</div>';
+  }).join('');
+  Array.prototype.forEach.call(box.querySelectorAll('button[data-rm]'), function (b) { b.onclick = function () { toggleTask(Number(b.dataset.rm), false); }; });
+  Array.prototype.forEach.call(box.querySelectorAll('input[type=radio]'), function (r) {
+    r.onchange = function () {
+      var p = r.name.split('_');
+      if (p[0] === 'q') SELECTED[Number(p[1])].answers[Number(p[2])] = r.value;
+      else SELECTED[Number(p[1])].intermittent = r.value;
+    };
+  });
+}
+
+function collect() {
+  function c(id) { return $(id).checked; }
+  return {
+    workerName: $('workerName').value.trim(),
+    job: $('job').value, emp: $('emp').value,
+    constructionDaily: c('constructionDaily'), halfTime: c('halfTime'),
+    newHire: c('newHire'), taskChange: c('taskChange'),
+    tasks: Object.keys(SELECTED).map(function (no) { return { no: Number(no), answers: SELECTED[no].answers, intermittent: SELECTED[no].intermittent }; }),
+    sub: { msds: c('sub_msds'), managed: c('sub_managed'), permit: c('sub_permit'), special: c('sub_special'), newSubstance: c('sub_newSubstance'), msdsRevised: c('sub_msdsRevised') },
+    hz: { noise: c('hz_noise'), vibration: c('hz_vibration'), dust: c('hz_dust'), pathogen: c('hz_pathogen'), msd: c('hz_msd') },
+    otherLaws: c('otherLaws')
+  };
+}
+
+$('judgeBtn').onclick = function () {
+  var input = collect();
+  $('judgeBtn').disabled = true; $('msg').textContent = '판정 중…';
+  google.script.run.withSuccessHandler(function (r) {
+    $('judgeBtn').disabled = false; $('msg').textContent = '';
+    LAST = { input: input, result: r };
+    renderResult(input, r);
+  }).withFailureHandler(fail).judge(input);
+};
+
+var LAYER_NAMES = { A: 'A. 산업안전보건법 법정 교육', B: 'B. 물질안전보건자료(MSDS) 교육', C: 'C. 유해성 주지 의무 (안전보건규칙)', D: 'D. 타 법령 교육' };
+
+function badge(s) { var k = s.indexOf('판단') === 0 ? '판단' : s.indexOf('갈음') === 0 ? '갈음' : s; return '<span class="badge s-' + k + '">' + esc(s) + '</span>'; }
+
+function renderResult(input, r) {
+  var count = function (st) { return r.rows.filter(function (x) { return x.status === st; }).length; };
+  var html = '<h2>판정 결과' + (input.workerName ? ' · ' + esc(input.workerName) : '') + '</h2>';
+  html += '<div class="meta">' + esc(r.summary.jobLabel) + (r.summary.empLabel !== '-' ? ' · ' + esc(r.summary.empLabel) : '') +
+    ' · 대상 ' + count('대상') + '건 · 판단 필요 ' + count('판단 필요') + '건 · 갈음 가능 ' + count('갈음 가능') + '건</div>';
+  ['A', 'B', 'C', 'D'].forEach(function (L) {
+    var rows = r.rows.filter(function (x) { return x.layer === L; });
+    if (!rows.length) return;
+    html += '<div class="layer">' + LAYER_NAMES[L] + '</div><table><colgroup><col class="c1"><col class="c2"><col class="c3"><col class="c4"><col class="c5"><col class="c6"><col></colgroup><thead><tr><th>판정</th><th>교육 종류</th><th>발생 사유</th><th>법적 최소 시간</th><th>시기·주기</th><th>근거</th><th>비고</th></tr></thead><tbody>';
+    rows.forEach(function (x) {
+      html += '<tr><td>' + badge(x.status) + '</td><td>' + esc(x.course) + '</td><td>' + esc(x.reason) + '</td><td>' + esc(x.hoursText) + '</td><td>' + esc(x.timing) +
+        '</td><td>' + esc(x.basis) + '<div class="lv">' + esc(x.level) + '</div></td><td>' + esc(x.note).replace(/ \/ /g, '<br>') +
+        (x.content ? '<details><summary>교육내용 보기</summary>' + esc(x.content).replace(/\n/g, '<br>') + '</details>' : '') + '</td></tr>';
+    });
+    html += '</tbody></table>';
+  });
+  if (r.notes.length) html += '<div class="notes"><b>참고</b><ul>' + r.notes.map(function (n) { return '<li>' + esc(n) + '</li>'; }).join('') + '</ul></div>';
+  html += '<div style="margin-top:12px"><button id="saveBtn">판정기록 시트에 저장</button> <span class="msg" id="saveMsg"></span></div>';
+  html += '<div class="disc">' + esc(r.app.disclaimer) + '</div>';
+  $('result').innerHTML = html;
+  $('saveBtn').onclick = function () {
+    this.disabled = true;
+    google.script.run.withSuccessHandler(function () { $('saveMsg').textContent = '저장했습니다.'; })
+      .withFailureHandler(function (e) { $('saveMsg').textContent = '저장 실패: ' + (e.message || e); $('saveBtn').disabled = false; })
+      .saveLog(LAST.input, LAST.result);
+  };
+}
+</script>
+</body>
+</html>
