@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>안전보건교육 판정·이수관리</title>
+<style>
+  :root { --navy:#1f3a5f; --line:#d6dbe3; --bg:#f6f8fb; --muted:#5b6575; --ok:#1b7a3d; --warn:#b26a00; --no:#7a7f87; --info:#2a5db0; --red:#b00020; }
+  * { box-sizing:border-box; }
+  body { font-family:'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif; font-size:13px; color:#1d2430; margin:0; background:#fff; }
+  header { background:var(--navy); color:#fff; padding:10px 16px; display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 14px; }
+  header h1 { font-size:16px; margin:0; }
+  header .meta { color:#c9d4e5; font-size:12px; }
+  nav { display:flex; flex-wrap:wrap; gap:2px; background:#e9edf3; padding:6px 10px 0; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:5; }
+  nav button { border:1px solid transparent; border-bottom:none; background:transparent; padding:8px 12px; border-radius:6px 6px 0 0; color:var(--navy); font-size:13px; cursor:pointer; font-weight:600; }
+  nav button.on { background:#fff; border-color:var(--line); }
+  main { padding:14px 16px 40px; }
+  section.tab { display:none; } section.tab.on { display:block; }
+  h2 { font-size:14px; margin:16px 0 8px; color:var(--navy); border-bottom:2px solid var(--navy); padding-bottom:4px; }
+  h2:first-child { margin-top:0; }
+  label { display:block; margin:6px 0 2px; font-weight:600; }
+  select, input[type=text], input[type=date], input[type=number], textarea { width:100%; padding:6px 8px; border:1px solid var(--line); border-radius:4px; font-size:13px; background:#fff; font-family:inherit; }
+  .chk { display:flex; align-items:flex-start; gap:6px; margin:4px 0; font-weight:400; }
+  .chk input { margin-top:2px; }
+  .row { display:flex; gap:6px; } .row > * { flex:1; }
+  .grid2 { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:4px 12px; }
+  button { padding:7px 12px; border:1px solid var(--navy); background:#fff; color:var(--navy); border-radius:4px; cursor:pointer; font-size:13px; font-family:inherit; }
+  button.primary { background:var(--navy); color:#fff; }
+  button.wide { width:100%; padding:10px; font-size:14px; margin-top:12px; }
+  button.danger { border-color:var(--red); color:var(--red); }
+  button:disabled { opacity:.5; cursor:default; }
+  .hint { color:var(--muted); font-size:12px; margin:2px 0 6px; }
+  .judge { display:grid; grid-template-columns:380px 1fr; gap:0; border:1px solid var(--line); border-radius:6px; overflow:hidden; }
+  .judge .left { background:var(--bg); padding:14px; border-right:1px solid var(--line); }
+  .judge .right { padding:14px 16px; min-width:0; }
+  .cand { background:#fff; border:1px solid var(--line); border-radius:4px; padding:6px 8px; margin:4px 0; }
+  .cand .chk { margin:0; }
+  .task { background:#fff; border:1px solid var(--navy); border-radius:6px; padding:8px; margin:6px 0; }
+  .task .title { font-weight:700; display:flex; justify-content:space-between; gap:8px; }
+  .task .title button { padding:2px 8px; font-size:12px; white-space:nowrap; flex:0 0 auto; align-self:flex-start; }
+  .q { margin:6px 0 0; padding-top:6px; border-top:1px dashed var(--line); }
+  .q .qt { margin-bottom:3px; }
+  .radios { display:flex; gap:12px; } .radios label { font-weight:400; margin:0; display:flex; gap:4px; align-items:center; }
+  .tbl-wrap { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; margin-top:6px; font-size:12px; }
+  table.fixed { table-layout:fixed; }
+  th, td { border:1px solid var(--line); padding:6px 7px; vertical-align:top; text-align:left; }
+  th { background:var(--navy); color:#fff; font-weight:600; white-space:nowrap; }
+  td.num { text-align:right; white-space:nowrap; }
+  col.c1{width:76px} col.c2{width:110px} col.c3{width:150px} col.c4{width:96px} col.c5{width:100px} col.c6{width:130px}
+  .badge { display:inline-block; padding:1px 7px; border-radius:10px; font-size:12px; font-weight:700; white-space:nowrap; color:#fff; }
+  .s-대상 { background:var(--ok); } .s-판단 { background:var(--warn); } .s-비대상 { background:var(--no); } .s-갈음 { background:var(--info); } .s-참고 { background:#8a93a3; }
+  .st { display:inline-block; padding:1px 7px; border-radius:4px; white-space:nowrap; }
+  .lv { font-size:11px; color:var(--muted); }
+  .layer { margin-top:14px; font-weight:700; color:var(--navy); }
+  .notes { background:#fff8e6; border:1px solid #f0d58c; border-radius:4px; padding:8px 10px; margin-top:12px; }
+  .notes li { margin:3px 0; }
+  .disc { color:var(--red); margin-top:14px; font-size:12px; }
+  .meta2 { color:var(--muted); font-size:12px; }
+  .empty { color:var(--muted); padding:40px 0; text-align:center; }
+  details { margin-top:4px; } summary { cursor:pointer; color:var(--info); font-size:12px; }
+  .msg { margin-top:8px; font-size:12px; }
+  .toolbar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:8px; }
+  .toolbar select, .toolbar input { width:auto; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:8px; margin-bottom:12px; }
+  .card { border:1px solid var(--line); border-radius:6px; padding:10px; background:var(--bg); }
+  .card b { display:block; font-size:20px; color:var(--navy); }
+  .bar { height:8px; background:#e6e9ef; border-radius:4px; overflow:hidden; min-width:60px; }
+  .bar i { display:block; height:100%; background:var(--ok); }
+  .modal { position:fixed; inset:0; background:rgba(20,30,45,.45); display:none; align-items:flex-start; justify-content:center; padding:30px 12px; overflow-y:auto; z-index:20; }
+  .modal.on { display:flex; }
+  .modal .box { background:#fff; border-radius:8px; padding:16px; width:min(760px, 100%); }
+  .banner { background:#eef3fb; border:1px solid #c7d6ee; border-radius:6px; padding:8px 12px; margin-bottom:12px; color:#22406b; }
+  .cert { border:1px solid var(--line); padding:20px; border-radius:6px; }
+  .cert h3 { font-size:18px; margin:0 0 12px; text-align:center; }
+  .ok { background:#d9f2e1; } .bad { background:#fadbd8; }
+  footer { color:var(--muted); font-size:12px; padding:10px 16px; border-top:1px solid var(--line); }
+  @media (max-width: 860px) { .judge { grid-template-columns:1fr; } .judge .left { border-right:none; border-bottom:1px solid var(--line); } }
+  @media print {
+    header, nav, footer, .noprint { display:none !important; }
+    section.tab { display:none !important; } section.tab.print { display:block !important; }
+    main { padding:0; } .cert { border:none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>안전보건교육 판정·이수관리</h1>
+  <span class="meta" id="metaLine"></span>
+</header>
+<nav id="nav">
+  <button data-tab="judge" class="on">교육 판정</button>
+  <button data-tab="workers">근로자 명단</button>
+  <button data-tab="plans">교육계획</button>
+  <button data-tab="records">이수 등록</button>
+  <button data-tab="board">현황판</button>
+  <button data-tab="cert">이수확인서</button>
+  <button data-tab="demo">시연</button>
+  <button data-tab="law">법령 데이터</button>
+  <button data-tab="settings">설정</button>
+</nav>
+<main>
+
+<!-- 1. 교육 판정 -->
+<section class="tab on" id="tab-judge">
+  <div class="judge">
+    <div class="left">
+      <h2>1. 근로자 정보</h2>
+      <label>근로자 (이름 또는 사번, 선택)</label>
+      <input type="text" id="workerName" placeholder="예: 홍길동 / A1234">
+      <label>직무 구분</label>
+      <select id="job">
+        <option value="other">그 밖의 근로자 (생산·현장 등)</option>
+        <option value="office">사무직</option>
+        <option value="sales">판매업무 직접 종사</option>
+        <option value="supervisor">관리감독자</option>
+      </select>
+      <div id="empBox">
+        <label>고용 형태</label>
+        <select id="emp">
+          <option value="regular">그 밖의 근로자 (정규직, 1개월 초과 기간제 등)</option>
+          <option value="fixed_1m">1주일 초과 1개월 이하 기간제</option>
+          <option value="fixed_1w">1주일 이하 기간제</option>
+          <option value="daily">일용근로자</option>
+        </select>
+      </div>
+      <label class="chk"><input type="checkbox" id="constructionDaily"> 건설 일용근로자</label>
+      <label class="chk"><input type="checkbox" id="halfTime"> 교육시간 1/2 감면 대상 사업</label>
+      <div class="hint">상시근로자 50명 미만 도매업·숙박 및 음식점업 등 (별표 4 비고 제3호)</div>
+
+      <h2>2. 발생 사유</h2>
+      <label class="chk"><input type="checkbox" id="newHire"> 신규 채용</label>
+      <label class="chk"><input type="checkbox" id="taskChange"> 작업내용 변경 (새 작업 투입·전환)</label>
+
+      <h2>3. 수행 작업</h2>
+      <div class="row">
+        <input type="text" id="q" placeholder="작업을 입력하세요 (예: 비계, 용접, 맨홀)">
+        <button id="searchBtn" style="flex:0 0 auto">검색</button>
+      </div>
+      <div class="hint">검색 결과에서 해당 작업을 체크하세요. 목록에서 직접 고를 수도 있습니다.</div>
+      <select id="allTasks"><option value="">― 39개 특별교육 작업 목록에서 선택 ―</option></select>
+      <div id="cands"></div>
+      <div id="selected"></div>
+
+      <h2>4. 취급 화학물질</h2>
+      <label class="chk"><input type="checkbox" id="sub_msds"> MSDS 대상물질 취급</label>
+      <label class="chk"><input type="checkbox" id="sub_managed"> 관리대상 유해물질 취급</label>
+      <label class="chk"><input type="checkbox" id="sub_permit"> 허가대상 유해물질 취급</label>
+      <label class="chk"><input type="checkbox" id="sub_special"> 특별관리물질 취급</label>
+      <label class="chk"><input type="checkbox" id="sub_newSubstance"> 신규 MSDS 대상물질 도입</label>
+      <label class="chk"><input type="checkbox" id="sub_msdsRevised"> MSDS 유해성·위험성 정보 변경</label>
+
+      <h2>5. 유해인자 노출</h2>
+      <label class="chk"><input type="checkbox" id="hz_noise"> 소음작업</label>
+      <label class="chk"><input type="checkbox" id="hz_vibration"> 진동작업</label>
+      <label class="chk"><input type="checkbox" id="hz_dust"> 분진작업</label>
+      <label class="chk"><input type="checkbox" id="hz_pathogen"> 병원체 노출</label>
+      <label class="chk"><input type="checkbox" id="hz_msd"> 근골격계부담작업</label>
+
+      <h2>6. 기타</h2>
+      <label class="chk"><input type="checkbox" id="otherLaws"> 타 법령 교육도 표시 (화학물질관리법 등, 확인필요)</label>
+
+      <button class="primary wide" id="judgeBtn">판정하기</button>
+      <div class="msg" id="judgeMsg"></div>
+    </div>
+    <div class="right">
+      <div id="result"><div class="empty">왼쪽에 정보를 입력하고 [판정하기]를 누르세요.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. 근로자 명단 -->
+<section class="tab" id="tab-workers">
+  <div class="toolbar">
+    <button class="primary" id="addWorker">+ 근로자 추가</button>
+    <span class="hint">근로자를 등록하면 교육계획이 자동으로 만들어집니다.</span>
+  </div>
+  <div class="tbl-wrap" id="workerTable"></div>
+</section>
+
+<!-- 3. 교육계획 -->
+<section class="tab" id="tab-plans">
+  <div class="toolbar">
+    <label style="margin:0">근로자</label><select id="planWorker"></select>
+    <label style="margin:0">상태</label><select id="planState"></select>
+    <span class="meta2" id="planBase"></span>
+  </div>
+  <div class="tbl-wrap" id="planTable"></div>
+</section>
+
+<!-- 4. 이수 등록 -->
+<section class="tab" id="tab-records">
+  <h2>이수 등록</h2>
+  <label>교육계획 (미완료만 표시)</label>
+  <select id="r_plan"></select>
+  <div class="row">
+    <div><label>실시일</label><input type="date" id="r_date"></div>
+    <div><label>교육시간(시간)</label><input type="number" id="r_hours" step="0.5" min="0" value="1"></div>
+    <div><label>교육방법</label><select id="r_method"><option>집체교육</option><option>현장교육</option><option>인터넷 원격교육</option></select></div>
+  </div>
+  <div class="row">
+    <div><label>강사</label><input type="text" id="r_instructor" placeholder="예: 안전관리자 김OO"></div>
+    <div><label>증빙 종류</label><select id="r_evType"><option>참석자 서명부</option><option>교육 사진</option><option>수료증</option><option>교육자료</option><option>기타</option></select></div>
+    <div><label>증빙 파일</label><input type="file" id="r_file"></div>
+  </div>
+  <label>교육내용</label>
+  <textarea id="r_content" rows="2" placeholder="예: 밀폐공간 산소농도 측정, 비상구출 절차"></textarea>
+  <div class="hint">증빙 파일은 이 브라우저(IndexedDB)에만 저장됩니다. 다른 컴퓨터로 옮기려면 설정 탭에서 백업하세요.</div>
+  <button class="primary" id="r_save">등록</button> <span class="msg" id="r_msg"></span>
+  <h2>이수기록</h2>
+  <div class="tbl-wrap" id="recordTable"></div>
+</section>
+
+<!-- 5. 현황판 -->
+<section class="tab" id="tab-board">
+  <div id="boardView"></div>
+</section>
+
+<!-- 6. 이수확인서 -->
+<section class="tab" id="tab-cert">
+  <div class="toolbar noprint">
+    <label style="margin:0">근로자</label><select id="certWorker"></select>
+    <button class="primary" id="certPrint">인쇄 / PDF 저장</button>
+  </div>
+  <div id="certView"></div>
+</section>
+
+<!-- 7. 시연 -->
+<section class="tab" id="tab-demo">
+  <div class="banner">가상 사업장 <b>(가상) 한빛정밀화학 울산공장</b>의 근로자 10명과 이수기록 19건으로 앱을 시연합니다. 실존 회사·인물과 무관합니다. 기준일은 2026-11-04로 설정됩니다.</div>
+  <div class="toolbar">
+    <button class="primary" id="demoLoad">① 시연용 가상 데이터 넣기</button>
+    <button class="primary" id="demoVerify">② 정답표 대조하기</button>
+  </div>
+  <div id="demoView"></div>
+</section>
+
+<!-- 8. 법령 데이터 -->
+<section class="tab" id="tab-law">
+  <div class="toolbar">
+    <select id="lawSel">
+      <option value="hours">교육시간</option>
+      <option value="tasks">특별교육작업 (39개)</option>
+      <option value="notice">유해성주지</option>
+      <option value="rules">규칙표</option>
+      <option value="issues">확인필요목록</option>
+    </select>
+    <span class="hint">확인수준: 원문확인(법령 원본 확인) / 2차자료(해설·질의회시 기준) / 확인필요(원문 대조 전)</span>
+  </div>
+  <div class="tbl-wrap" id="lawView"></div>
+</section>
+
+<!-- 9. 설정 -->
+<section class="tab" id="tab-settings">
+  <h2>기준일</h2>
+  <div class="row" style="max-width:420px"><input type="date" id="s_base"><button id="s_today" style="flex:0 0 auto">오늘로</button></div>
+  <div class="hint">교육계획의 기한·상태 계산 기준입니다. 비워 두면 오늘 날짜를 씁니다.</div>
+  <h2>백업</h2>
+  <div class="toolbar">
+    <button id="s_export">백업 파일 내보내기 (.json)</button>
+    <label class="chk" style="margin:0"><input type="checkbox" id="s_withFiles" checked> 증빙 파일 포함</label>
+    <button id="s_importBtn">백업 파일 가져오기</button>
+    <input type="file" id="s_import" accept=".json,application/json" style="display:none">
+  </div>
+  <div class="hint">모든 데이터는 이 브라우저에만 저장되며 서버로 전송되지 않습니다. 브라우저 데이터를 지우면 함께 사라지므로 정기적으로 백업하세요.</div>
+  <h2>초기화</h2>
+  <button class="danger" id="s_reset">모든 근로자·이수기록·증빙 삭제</button>
+  <div class="msg" id="s_msg"></div>
+</section>
+
+</main>
+<footer id="footer"></footer>
+
+<!-- 근로자 편집 창 -->
+<div class="modal" id="wModal">
+  <div class="box">
+    <h2 id="wTitle">근로자 추가</h2>
+    <div class="row">
+      <div><label>사번</label><input type="text" id="w_id"></div>
+      <div><label>이름</label><input type="text" id="w_name"></div>
+    </div>
+    <div class="row">
+      <div><label>직무 구분</label><select id="w_job"><option>그 밖의 근로자</option><option>사무직</option><option>판매업무 직접 종사</option><option>관리감독자</option></select></div>
+      <div><label>고용 형태</label><select id="w_emp"><option>정규·그 밖의 근로자</option><option>1주 초과 1개월 이하</option><option>1주 이하</option><option>일용</option></select></div>
+    </div>
+    <div class="row">
+      <div><label>채용일</label><input type="date" id="w_hire"></div>
+      <div><label>현 작업 배치일</label><input type="date" id="w_assign"></div>
+    </div>
+    <div class="grid2" style="margin-top:8px">
+      <label class="chk"><input type="checkbox" id="w_newHire"> 신규 채용</label>
+      <label class="chk"><input type="checkbox" id="w_taskChange"> 작업내용 변경</label>
+      <label class="chk"><input type="checkbox" id="w_const"> 건설 일용근로자</label>
+      <label class="chk"><input type="checkbox" id="w_half"> 1/2 감면 대상 사업</label>
+    </div>
+    <label>특별교육 작업 번호</label>
+    <input type="text" id="w_tasks" placeholder="예: 26  /  14(예,아니오)  /  34, 38">
+    <div class="hint">괄호 안에는 해당 작업 확인 질문의 답(예·아니오·모름)을 순서대로 적습니다. 번호는 법령 데이터 탭의 39개 목록 참고.</div>
+    <label>단기간·간헐 여부</label>
+    <input type="text" id="w_inter" placeholder="예: 34=예, 14=아니오">
+    <div class="hint">적지 않은 작업은 "모름"으로 처리되어 판단 필요로 표시됩니다.</div>
+    <label>취급 화학물질</label>
+    <div class="grid2">
+      <label class="chk"><input type="checkbox" id="w_msds"> MSDS 대상물질</label>
+      <label class="chk"><input type="checkbox" id="w_managed"> 관리대상 유해물질</label>
+      <label class="chk"><input type="checkbox" id="w_permit"> 허가대상 유해물질</label>
+      <label class="chk"><input type="checkbox" id="w_special"> 특별관리물질</label>
+      <label class="chk"><input type="checkbox" id="w_newSub"> 신규 물질 도입</label>
+      <label class="chk"><input type="checkbox" id="w_msdsRev"> MSDS 변경</label>
+    </div>
+    <label>유해인자</label>
+    <div class="grid2" id="w_hz"></div>
+    <label>메모</label>
+    <input type="text" id="w_memo">
+    <div class="toolbar" style="margin-top:14px">
+      <button class="primary" id="w_save">저장</button>
+      <button id="w_cancel">취소</button>
+      <span class="msg" id="w_msg" style="margin:0"></span>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
